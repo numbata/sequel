@@ -188,7 +188,9 @@ module Sequel
         # position field already has a value.
         def before_validation
           unless get_column_value(position_field)
-            set_column_value("#{position_field}=", list_dataset.max(position_field).to_i+1)
+            max_position = list_dataset.max(position_field)
+            position_value = max_position.nil? ? model.top_of_list : max_position.to_i + 1
+            set_column_value("#{position_field}=", position_value)
           end
           super
         end

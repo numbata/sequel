@@ -93,7 +93,19 @@ describe "List plugin" do
       "INSERT INTO items (position) VALUES (1)", 
       "SELECT * FROM items WHERE (id = 1) ORDER BY position LIMIT 1",
       "SELECT max(position) AS max FROM items LIMIT 1",
-      "INSERT INTO items (position) VALUES (2)", 
+      "INSERT INTO items (position) VALUES (2)",
+      "SELECT * FROM items WHERE (id = 2) ORDER BY position LIMIT 1"]
+  end
+
+  it "should have position field begin from zeroz when creating if not already set" do
+    @tc.dataset = @tc.dataset.with_autoid(1).with_fetch([[{:pos=>nil}], [{:id=>1, :position=>0}], [{:pos=>0}], [{:id=>2, :position=>1}]])
+    @tc.create.values.must_equal(:id=>1, :position=>0)
+    @tc.create.values.must_equal(:id=>2, :position=>1)
+    @db.sqls.must_equal ["SELECT max(position) AS max FROM items LIMIT 1",
+      "INSERT INTO items (position) VALUES (0)",
+      "SELECT * FROM items WHERE (id = 1) ORDER BY position LIMIT 1",
+      "SELECT max(position) AS max FROM items LIMIT 1",
+      "INSERT INTO items (position) VALUES (1)",
       "SELECT * FROM items WHERE (id = 2) ORDER BY position LIMIT 1"]
   end
 
